@@ -1,4 +1,19 @@
+import { ZodError } from 'zod';
 import { error } from '../utils/ApiResponse.js';
+
+/**
+ * Format Zod issues into a single readable message.
+ * @param {ZodError} err
+ * @returns {string}
+ */
+function formatZodError(err) {
+  return err.issues
+    .map((issue) => {
+      const path = issue.path.length ? issue.path.join('.') : 'request';
+      return `${path}: ${issue.message}`;
+    })
+    .join('; ');
+}
 
 /**
  * Global Express error-handling middleware.
@@ -10,6 +25,10 @@ import { error } from '../utils/ApiResponse.js';
  */
 export function errorMiddleware(err, req, res, _next) {
   console.error('[error]', err.message);
+
+  if (err instanceof ZodError) {
+    return error(res, formatZodError(err), 400);
+  }
 
   if (err.name === 'ValidationError') {
     return error(res, err.message, 400);

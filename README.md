@@ -8,7 +8,9 @@ Express + MongoDB API for the DGDF public site and admin portal.
 - **MongoDB** via **Mongoose**
 - **JWT** auth in `httpOnly` cookie (`dgdf_token`)
 - **Multer** + **Cloudinary** for gallery uploads
-- **Paystack** for donation initiate / verify
+- **Paystack** for donation initiate / verify / webhook
+
+Donations require `MONGODB_URI` and `PAYSTACK_SECRET_KEY`. In Paystack Dashboard, set the webhook URL to `https://<api-host>/api/donations/webhook`.
 
 ## Setup
 
@@ -19,7 +21,7 @@ npm install
 npm run dev
 ```
 
-The API starts on `http://localhost:5000` even when env vars are empty — controllers fall back to in-memory / mock behavior.
+The API starts on `http://localhost:5000`. Donation endpoints require MongoDB and `PAYSTACK_SECRET_KEY` (no mock payment fallback).
 
 ### Mock admin (no DB)
 
@@ -47,6 +49,7 @@ The API starts on `http://localhost:5000` even when env vars are empty — contr
 | GET    | `/api/donations`             | Admin   |
 | POST   | `/api/donations/initiate`    | Public  |
 | POST   | `/api/donations/verify`      | Public  |
+| POST   | `/api/donations/webhook`     | Public (Paystack) |
 | GET    | `/api/messages`              | Admin   |
 | POST   | `/api/messages`              | Public  |
 | PATCH  | `/api/messages/:id/read`     | Admin   |

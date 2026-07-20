@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { error } from '../utils/ApiResponse.js';
 import { isDBConnected } from '../config/db.js';
-import User from '../models/User.js';
+import * as userDao from '../daos/user.dao.js';
 
 const COOKIE_NAME = 'dgdf_token';
 
@@ -59,7 +59,7 @@ export async function protect(req, res, next) {
     const decoded = jwt.verify(token, getJwtSecret());
 
     if (isDBConnected()) {
-      const user = await User.findById(decoded.id).select('-password');
+      const user = await userDao.findById(decoded.id);
       if (!user) {
         return error(res, 'Not authorized — user not found', 401);
       }
