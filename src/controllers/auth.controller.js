@@ -11,7 +11,7 @@ import {
 /** In-memory fallback when MongoDB is unavailable */
 const MOCK_ADMIN = {
   id: 'mock-admin-id',
-  email: 'admin@dgdf.org',
+  email: 'admin@dgdelightfound.org',
   // password: "admin123"
   passwordHash: null,
   role: 'admin',
