@@ -1,22 +1,22 @@
-import jwt from 'jsonwebtoken';
-import { error } from '../utils/ApiResponse.js';
-import { isDBConnected } from '../config/db.js';
-import * as userDao from '../daos/user.dao.js';
+import jwt from "jsonwebtoken";
+import { error } from "../utils/ApiResponse.js";
+import { isDBConnected } from "../config/db.js";
+import * as userDao from "../daos/user.dao.js";
 
-const COOKIE_NAME = 'dgdf_token';
+const COOKIE_NAME = "dgdf_token";
 
 /** Roles that can access the admin portal */
-export const PORTAL_ROLES = ['super_admin', 'admin', 'viewer'];
+export const PORTAL_ROLES = ["super_admin", "admin", "viewer"];
 
 /** Roles that can mutate content / gallery / messages */
-export const EDITOR_ROLES = ['super_admin', 'admin'];
+export const EDITOR_ROLES = ["super_admin", "admin"];
 
 /**
  * Get the JWT secret, falling back to a development placeholder.
  * @returns {string}
  */
 function getJwtSecret() {
-  return process.env.JWT_SECRET || 'dgdf_dev_secret_change_me';
+  return process.env.JWT_SECRET || "dgdf_dev_secret_change_me";
 }
 
 /**
@@ -26,7 +26,7 @@ function getJwtSecret() {
  */
 export function signToken(payload) {
   return jwt.sign(payload, getJwtSecret(), {
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
   });
 }
 
@@ -37,8 +37,9 @@ export function signToken(payload) {
 export function authCookieOptions() {
   return {
     httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "none",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   };
 }
@@ -50,8 +51,8 @@ export function authCookieOptions() {
 export function clearAuthCookieOptions() {
   return {
     httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
   };
 }
 
@@ -64,9 +65,9 @@ function toReqUser(user) {
   return {
     id: user._id.toString(),
     email: user.email,
-    name: user.name || '',
+    name: user.name || "",
     role: user.role,
-    status: user.status || 'active',
+    status: user.status || "active",
   };
 }
 
@@ -81,12 +82,12 @@ export async function protect(req, res, next) {
   try {
     const token =
       req.cookies?.[COOKIE_NAME] ||
-      (req.headers.authorization?.startsWith('Bearer ')
+      (req.headers.authorization?.startsWith("Bearer ")
         ? req.headers.authorization.slice(7)
         : null);
 
     if (!token) {
-      return error(res, 'Not authorized — no token', 401);
+      return error(res, "Not authorized — no token", 401);
     }
 
     const decoded = jwt.verify(token, getJwtSecret());
@@ -94,25 +95,25 @@ export async function protect(req, res, next) {
     if (isDBConnected()) {
       const user = await userDao.findById(decoded.id);
       if (!user) {
-        return error(res, 'Not authorized — user not found', 401);
+        return error(res, "Not authorized — user not found", 401);
       }
-      if (user.status === 'inactive') {
-        return error(res, 'Account is deactivated', 403);
+      if (user.status === "inactive") {
+        return error(res, "Account is deactivated", 403);
       }
       req.user = toReqUser(user);
     } else {
       req.user = {
         id: decoded.id,
         email: decoded.email,
-        name: decoded.name || '',
-        role: decoded.role || 'admin',
-        status: 'active',
+        name: decoded.name || "",
+        role: decoded.role || "admin",
+        status: "active",
       };
     }
 
     next();
   } catch (err) {
-    return error(res, 'Not authorized — invalid token', 401);
+    return error(res, "Not authorized — invalid token", 401);
   }
 }
 
@@ -124,7 +125,11 @@ export async function protect(req, res, next) {
 export function requireRoles(...roles) {
   return (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {
-      return error(res, 'You do not have permission to perform this action', 403);
+      return error(
+        res,
+        "You do not have permission to perform this action",
+        403,
+      );
     }
     next();
   };
@@ -138,7 +143,7 @@ export function requireRoles(...roles) {
  */
 export function adminOnly(req, res, next) {
   if (!req.user || !PORTAL_ROLES.includes(req.user.role)) {
-    return error(res, 'Admin access required', 403);
+    return error(res, "Admin access required", 403);
   }
   next();
 }
@@ -151,7 +156,7 @@ export function adminOnly(req, res, next) {
  */
 export function editorOnly(req, res, next) {
   if (!req.user || !EDITOR_ROLES.includes(req.user.role)) {
-    return error(res, 'You do not have permission to perform this action', 403);
+    return error(res, "You do not have permission to perform this action", 403);
   }
   next();
 }
@@ -163,8 +168,8 @@ export function editorOnly(req, res, next) {
  * @param {import('express').NextFunction} next
  */
 export function superAdminOnly(req, res, next) {
-  if (!req.user || req.user.role !== 'super_admin') {
-    return error(res, 'Super admin access required', 403);
+  if (!req.user || req.user.role !== "super_admin") {
+    return error(res, "Super admin access required", 403);
   }
   next();
 }
@@ -179,7 +184,7 @@ export async function optionalProtect(req, res, next) {
   try {
     const token =
       req.cookies?.[COOKIE_NAME] ||
-      (req.headers.authorization?.startsWith('Bearer ')
+      (req.headers.authorization?.startsWith("Bearer ")
         ? req.headers.authorization.slice(7)
         : null);
 
@@ -192,16 +197,16 @@ export async function optionalProtect(req, res, next) {
 
     if (isDBConnected()) {
       const user = await userDao.findById(decoded.id);
-      if (user && user.status !== 'inactive') {
+      if (user && user.status !== "inactive") {
         req.user = toReqUser(user);
       }
     } else {
       req.user = {
         id: decoded.id,
         email: decoded.email,
-        name: decoded.name || '',
-        role: decoded.role || 'admin',
-        status: 'active',
+        name: decoded.name || "",
+        role: decoded.role || "admin",
+        status: "active",
       };
     }
   } catch {
@@ -216,11 +221,11 @@ export async function optionalProtect(req, res, next) {
  * @returns {string}
  */
 export function getClientIp(req) {
-  const forwarded = req.headers['x-forwarded-for'];
-  if (typeof forwarded === 'string' && forwarded.trim()) {
-    return forwarded.split(',')[0].trim();
+  const forwarded = req.headers["x-forwarded-for"];
+  if (typeof forwarded === "string" && forwarded.trim()) {
+    return forwarded.split(",")[0].trim();
   }
-  return req.ip || req.socket?.remoteAddress || '';
+  return req.ip || req.socket?.remoteAddress || "";
 }
 
 export { COOKIE_NAME };
