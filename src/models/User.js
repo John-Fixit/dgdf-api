@@ -10,6 +10,11 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
+    name: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     password: {
       type: String,
       required: true,
@@ -17,8 +22,22 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      default: 'admin',
-      enum: ['admin'],
+      default: 'viewer',
+      enum: ['super_admin', 'admin', 'viewer'],
+    },
+    status: {
+      type: String,
+      default: 'active',
+      enum: ['active', 'inactive'],
+    },
+    lastLogin: {
+      type: Date,
+      default: null,
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
     },
   },
   {

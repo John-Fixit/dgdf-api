@@ -1,22 +1,30 @@
 import { Router } from 'express';
 import { asyncHandler } from '../utils/asyncHandler.js';
-import { protect, adminOnly } from '../middleware/auth.middleware.js';
+import { protect, editorOnly } from '../middleware/auth.middleware.js';
 import { validate } from '../middleware/validate.middleware.js';
 import {
-  contentKeyParamSchema,
-  updateContentBodySchema,
+  contentPageParamSchema,
+  updateContentSectionBodySchema,
 } from '../schemas/content.schema.js';
-import { getContent, updateContent } from '../controllers/content.controller.js';
+import {
+  getContent,
+  replaceContent,
+  updateContentSection,
+} from '../controllers/content.controller.js';
 
 const router = Router();
 
 router.get('/', asyncHandler(getContent));
+router.put('/', protect, editorOnly, asyncHandler(replaceContent));
 router.patch(
-  '/:key',
+  '/:page/:section',
   protect,
-  adminOnly,
-  validate({ params: contentKeyParamSchema, body: updateContentBodySchema }),
-  asyncHandler(updateContent)
+  editorOnly,
+  validate({
+    params: contentPageParamSchema,
+    body: updateContentSectionBodySchema,
+  }),
+  asyncHandler(updateContentSection)
 );
 
 export default router;

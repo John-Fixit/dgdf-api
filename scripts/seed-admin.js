@@ -22,13 +22,22 @@ async function seedAdmin() {
 
   const existing = await User.findOne({ email });
   if (existing) {
-    console.log(`Admin already exists in dgdelightfound_db: ${email}`);
+    console.log(`Admin already exists: ${email}`);
     await mongoose.disconnect();
     return;
   }
 
-  const user = await User.create({ email, password, role: "admin" });
-  console.log(`Admin created in dgdelightfound_db: ${email} (id: ${user._id})`);
+  const name = process.env.ADMIN_NAME || "Administrator";
+  const user = await User.create({
+    email,
+    password,
+    name,
+    role: "super_admin",
+    status: "active",
+  });
+  console.log(
+    `Super admin created in dgdelightfound_db: ${email} (id: ${user._id})`,
+  );
   await mongoose.disconnect();
 }
 

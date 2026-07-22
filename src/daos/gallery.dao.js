@@ -7,27 +7,44 @@ const mockGallery = [
     _id: 'mock-gallery-1',
     imageUrl: 'https://placehold.co/800x600?text=Gallery+1',
     publicId: 'stub_mock_1',
+    title: 'Community outreach',
     caption: 'Community outreach',
-    category: 'events',
+    description: 'Volunteers serving the community.',
+    category: 'Impact Event',
+    status: 'active',
+    sortOrder: 1,
+    mediaType: 'image',
+    location: 'Lagos',
+    fileSize: '',
+    format: 'JPG',
     isActive: true,
     uploadedAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   },
 ];
 
 /**
- * List active gallery items, newest first.
+ * List gallery items.
+ * @param {{ all?: boolean }} [options]
  * @returns {Promise<Array>}
  */
-export async function findActive() {
+export async function findMany({ all = false } = {}) {
   if (isDBConnected()) {
     try {
-      return await Gallery.find({ isActive: true }).sort({ uploadedAt: -1 });
+      const filter = all ? {} : { status: 'active' };
+      return await Gallery.find(filter).sort({ sortOrder: 1, uploadedAt: -1 });
     } catch (err) {
-      console.warn('[galleryDao/findActive] DB error:', err.message);
+      console.warn('[galleryDao/findMany] DB error:', err.message);
     }
   }
 
-  return mockGallery.filter((g) => g.isActive);
+  const items = all ? mockGallery : mockGallery.filter((g) => g.status === 'active');
+  return [...items].sort((a, b) => a.sortOrder - b.sortOrder);
+}
+
+/** @deprecated use findMany */
+export async function findActive() {
+  return findMany({ all: false });
 }
 
 /**
@@ -50,7 +67,8 @@ export async function create(payload) {
     uploadedAt:
       payload.uploadedAt instanceof Date
         ? payload.uploadedAt.toISOString()
-        : payload.uploadedAt,
+        : payload.uploadedAt ?? new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
   mockGallery.unshift(mockItem);
   return mockItem;
@@ -79,7 +97,40 @@ export async function findById(id) {
 }
 
 /**
- * Delete a gallery item by id. Returns the removed document, or null if missing.
+ * Update a gallery item by id.
+ * @param {string} id
+ * @param {object} payload
+ * @returns {Promise<object | null>}
+ */
+export async function updateById(id, payload) {
+  if (isDBConnected()) {
+    try {
+      return await Gallery.findByIdAndUpdate(id, payload, {
+        new: true,
+        runValidators: true,
+      });
+    } catch (err) {
+      console.warn('[galleryDao/updateById] DB error:', err.message);
+      if (err.name === 'CastError') {
+        const castErr = new Error('Invalid gallery ID');
+        castErr.statusCode = 400;
+        throw castErr;
+      }
+    }
+  }
+
+  const index = mockGallery.findIndex((g) => g._id === id);
+  if (index === -1) return null;
+  mockGallery[index] = {
+    ...mockGallery[index],
+    ...payload,
+    updatedAt: new Date().toISOString(),
+  };
+  return mockGallery[index];
+}
+
+/**
+ * Delete a gallery item by id.
  * @param {string} id
  * @returns {Promise<object | null>}
  */
@@ -87,9 +138,7 @@ export async function deleteById(id) {
   if (isDBConnected()) {
     try {
       const item = await Gallery.findById(id);
-      if (!item) {
-        return null;
-      }
+      if (!item) return null;
       await item.deleteOne();
       return item;
     } catch (err) {
@@ -103,9 +152,7 @@ export async function deleteById(id) {
   }
 
   const index = mockGallery.findIndex((g) => g._id === id);
-  if (index === -1) {
-    return null;
-  }
+  if (index === -1) return null;
   const [removed] = mockGallery.splice(index, 1);
   return removed;
 }

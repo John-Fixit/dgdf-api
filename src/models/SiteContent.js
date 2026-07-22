@@ -1,32 +1,42 @@
 import mongoose from 'mongoose';
 
-export const SITE_CONTENT_KEYS = [
-  'vision',
-  'mandate',
-  'aboutText',
-  'heroHeadline',
-  'missionText',
-];
-
+/**
+ * Nested CMS document for the public site (singleton by slug).
+ * Replaces the legacy flat key/value SiteContent shape.
+ */
 const siteContentSchema = new mongoose.Schema(
   {
-    key: {
+    slug: {
       type: String,
       required: true,
       unique: true,
-      enum: SITE_CONTENT_KEYS,
+      default: 'default',
       trim: true,
     },
-    value: {
-      type: String,
-      default: '',
+    home: { type: mongoose.Schema.Types.Mixed, required: true },
+    about: { type: mongoose.Schema.Types.Mixed, required: true },
+    founder: { type: mongoose.Schema.Types.Mixed, required: true },
+    gallery: { type: mongoose.Schema.Types.Mixed, required: true },
+    donate: { type: mongoose.Schema.Types.Mixed, required: true },
+    contact: { type: mongoose.Schema.Types.Mixed, required: true },
+    lastUpdatedAt: {
+      type: Date,
+      default: Date.now,
     },
   },
   {
-    timestamps: { createdAt: false, updatedAt: true },
+    timestamps: false,
   }
 );
 
 const SiteContent = mongoose.model('SiteContent', siteContentSchema);
 
 export default SiteContent;
+export const CONTENT_PAGES = [
+  'home',
+  'about',
+  'founder',
+  'gallery',
+  'donate',
+  'contact',
+];

@@ -1,19 +1,45 @@
+import { AppError } from '../utils/AppError.js';
+import { CONTENT_PAGES } from '../models/SiteContent.js';
 import * as contentDao from '../daos/content.dao.js';
 
 /**
- * Get all site content as a key→value map.
- * @returns {Promise<Record<string, string>>}
+ * Get the full CMS document.
+ * @returns {Promise<object>}
  */
 export async function getContent() {
-  return contentDao.findAllAsMap();
+  return contentDao.getDocument();
 }
 
 /**
- * Update a single content key.
- * @param {string} key
- * @param {string} value
- * @returns {Promise<{ key: string, value: string, updatedAt: Date | string }>}
+ * Replace the full CMS document.
+ * @param {object} payload
+ * @returns {Promise<object>}
  */
-export async function updateContent(key, value) {
-  return contentDao.upsert(key, value);
+export async function replaceContent(payload) {
+  for (const page of CONTENT_PAGES) {
+    if (!payload?.[page] || typeof payload[page] !== 'object') {
+      throw new AppError(`Missing content page: ${page}`, 400);
+    }
+  }
+  return contentDao.replaceDocument(payload);
+}
+
+/**
+ * Update a single page section.
+ * @param {string} page
+ * @param {string} section
+ * @param {Record<string, unknown>} data
+ * @returns {Promise<object>}
+ */
+export async function updateContentSection(page, section, data) {
+  if (!CONTENT_PAGES.includes(page)) {
+    throw new AppError(`Invalid content page: ${page}`, 400);
+  }
+  if (!section || typeof section !== 'string') {
+    throw new AppError('Section is required', 400);
+  }
+  if (!data || typeof data !== 'object') {
+    throw new AppError('Section data is required', 400);
+  }
+  return contentDao.updateSection(page, section, data);
 }

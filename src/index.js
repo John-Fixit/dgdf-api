@@ -10,13 +10,19 @@ import galleryRoutes from "./routes/gallery.routes.js";
 import donationRoutes from "./routes/donation.routes.js";
 import messageRoutes from "./routes/message.routes.js";
 import contentRoutes from "./routes/content.routes.js";
+import leadershipRoutes from "./routes/leadership.routes.js";
+import settingsRoutes from "./routes/settings.routes.js";
+import mediaRoutes from "./routes/media.routes.js";
+import auditRoutes from "./routes/audit.routes.js";
+import dashboardRoutes from "./routes/dashboard.routes.js";
+import administratorRoutes from "./routes/administrator.routes.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-const allowedOrigins = [process.env.CLIENT_URL, process.env.ADMIN_URL].filter(
-  Boolean,
-);
+const admin_url = process.env.ADMIN_URL.split(",");
+
+const allowedOrigins = [process.env.CLIENT_URL, ...admin_url].filter(Boolean);
 
 app.use(
   cors({
@@ -52,6 +58,13 @@ app.use("/gallery", galleryRoutes);
 app.use("/donations", donationRoutes);
 app.use("/messages", messageRoutes);
 app.use("/content", contentRoutes);
+app.use("/leadership", leadershipRoutes);
+app.use("/settings", settingsRoutes);
+app.use("/media", mediaRoutes);
+app.use("/audit-logs", auditRoutes);
+app.use("/audit-log", auditRoutes);
+app.use("/administrators", administratorRoutes);
+app.use("/dashboard", dashboardRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

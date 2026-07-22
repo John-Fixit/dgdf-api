@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { asyncHandler } from '../utils/asyncHandler.js';
-import { protect, adminOnly } from '../middleware/auth.middleware.js';
+import { protect, adminOnly, editorOnly } from '../middleware/auth.middleware.js';
 import { validate } from '../middleware/validate.middleware.js';
 import { createMessageBodySchema } from '../schemas/message.schema.js';
 import { idParamSchema } from '../schemas/common.schema.js';
@@ -22,14 +22,14 @@ router.post(
 router.patch(
   '/:id/read',
   protect,
-  adminOnly,
+  editorOnly,
   validate({ params: idParamSchema }),
   asyncHandler(markMessageRead)
 );
 router.delete(
   '/:id',
   protect,
-  adminOnly,
+  editorOnly,
   validate({ params: idParamSchema }),
   asyncHandler(deleteMessage)
 );

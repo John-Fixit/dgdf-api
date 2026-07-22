@@ -10,8 +10,15 @@ export const createMessageBodySchema = z.object({
     .trim()
     .email('Valid email is required'),
   phone: z.string().trim().optional().default(''),
+  subject: z.string().trim().optional().default(''),
+  inquiryType: z.string().trim().optional().default(''),
   message: z
     .string({ error: 'message is required' })
     .trim()
-    .min(1, 'message is required'),
+    .min(1, 'message is required')
+    .optional(),
+  body: z.string().trim().min(1).optional(),
+}).refine((data) => Boolean(data.message || data.body), {
+  message: 'message is required',
+  path: ['message'],
 });
