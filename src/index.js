@@ -20,9 +20,9 @@ import administratorRoutes from "./routes/administrator.routes.js";
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-const admin_url = process.env.ADMIN_URL.split(",");
+const client_url = process.env.CLIENT_URL.split(",");
 
-const allowedOrigins = [process.env.CLIENT_URL, ...admin_url].filter(Boolean);
+const allowedOrigins = [...client_url].filter(Boolean);
 
 app.use(
   cors({
