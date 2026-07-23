@@ -223,11 +223,40 @@ function computeUnreadTrend(unread) {
 }
 
 /**
- * Build monthly (last 12) and yearly donation charts from successful gifts.
+ * Build weekly (current Sun–Sat), monthly (last 12), and yearly donation charts.
  * @param {object[]} successful
  */
 function buildDonationCharts(successful) {
   const now = new Date();
+  const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  // Current calendar week: Sunday → Saturday
+  const sunday = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() - now.getDay()
+  );
+  const weekly = [];
+  for (let i = 0; i < 7; i += 1) {
+    const day = new Date(
+      sunday.getFullYear(),
+      sunday.getMonth(),
+      sunday.getDate() + i
+    );
+    const value = successful
+      .filter((d) => {
+        const created = new Date(d.createdAt);
+        return (
+          !Number.isNaN(created.getTime()) &&
+          created.getFullYear() === day.getFullYear() &&
+          created.getMonth() === day.getMonth() &&
+          created.getDate() === day.getDate()
+        );
+      })
+      .reduce((sum, d) => sum + (Number(d.amount) || 0), 0);
+    weekly.push({ label: WEEKDAY_LABELS[i], value });
+  }
+
   const monthly = [];
   for (let i = 11; i >= 0; i -= 1) {
     const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -261,6 +290,7 @@ function buildDonationCharts(successful) {
   }));
 
   return {
+    weekly: markPeak(weekly),
     monthly: markPeak(monthly),
     yearly: markPeak(yearly),
   };
