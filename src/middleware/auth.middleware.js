@@ -37,9 +37,8 @@ export function signToken(payload) {
 export function authCookieOptions() {
   return {
     httpOnly: true,
-    sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
-    sameSite: "none",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   };
 }
@@ -51,7 +50,7 @@ export function authCookieOptions() {
 export function clearAuthCookieOptions() {
   return {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     secure: process.env.NODE_ENV === "production",
   };
 }
