@@ -21,9 +21,9 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 const admin_url = process.env.ADMIN_URL.split(",");
-const client_url = process.env.CLIENT_URL;
+const client_url = process.env.CLIENT_URL.split(",");
 
-const allowedOrigins = [client_url, ...admin_url].filter(Boolean);
+const allowedOrigins = [...client_url, ...admin_url].filter(Boolean);
 
 app.use(
   cors({
