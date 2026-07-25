@@ -1,21 +1,30 @@
+const MISSION =
+  'To fulfill the social responsibility of our divine mandate through meeting the needs of the less privileged people of Nigerian society via providing them with humanitarian and empowerment support thereby restoring hope and dignity to them in our society.';
+
+const VISION =
+  'To become a humanitarian organization renowned for providing a platform where individuals irrespective of their backgrounds can transition from just existing to fulfilling life purpose.';
+
+const OUR_STORY =
+  "Divine Gospel Delight Foundation was founded as an offshoot of our divine mandate of propagating the Gospel through service for humanity. We started from meeting small needs of people in the neighborhood with focus on widows, orphans, teenage children, retirees etc. Our passion is growing into family enrichment programs for effective parenting and achieving sustainability in family lives. We are also progressing to becoming a foundation committed to people's health, education and spiritual enrichment across Nigeria and to other parts of the world.";
+
 /** Default nested CMS document seeded when the collection is empty */
 export const DEFAULT_CMS_DOCUMENT = {
   home: {
     hero: {
-      headline: 'Restoring Hope and Dignity to the Heart of Nigeria.',
+      headline: 'Restoring Hope and Dignity to Every Life',
       paragraph:
-        'We are a humanitarian foundation dedicated to empowering underserved communities through sustainable health, education, and spiritual guidance. Every soul deserves a chance at delight.',
+        'We exist to meet the needs of the less privileged through humanitarian and empowerment support — a faith-filled calling to restore hope, dignity, and purpose across Nigerian communities.',
     },
     mission: {
       title: 'Our Mission',
-      body: 'To preach the gospel, serve the vulnerable, and empower communities with compassion, dignity, and hope across Nigeria.',
+      body: MISSION,
     },
     visionMandateImpact: {
-      vision: 'Building a Nigeria where delight is a common heritage.',
+      vision: VISION,
       mandate:
-        'To preach the gospel, serve the vulnerable, and empower communities with compassion, dignity, and hope.',
+        'Propagating the Gospel through service for humanity — restoring hope and dignity to the less privileged.',
       impactSummary:
-        'We believe in measurable, sustainable change that outlives our physical presence — impact over optics.',
+        'Serving widows, orphans, teenagers, retirees, and families — and growing into health, education, and spiritual enrichment across Nigeria and beyond.',
     },
     impactStats: {
       livesImpacted: 12000,
@@ -24,107 +33,104 @@ export const DEFAULT_CMS_DOCUMENT = {
       successRate: 92,
     },
     donateCta: {
-      headline: 'Your Generosity Fuels Transformation',
+      headline: 'Sow Into Hope and Dignity',
       subtext:
-        'Join partners across Nigeria in restoring hope through education, health, and community outreach.',
+        'Your gift helps us fulfill our divine mandate — meeting needs, empowering families, and restoring hope across Nigerian communities.',
     },
   },
   about: {
     hero: {
-      headline: 'Crafting a Legacy of Hope & Excellence in Nigeria.',
+      headline: 'Propagating the Gospel Through Service for Humanity',
       subtext:
-        'Divine Gospel Delight Foundation stands as a beacon of refined philanthropy, dedicated to restoring dignity and creating sustainable impact.',
+        'Divine Gospel Delight Foundation was founded as an offshoot of our divine mandate of propagating the Gospel through service for humanity.',
     },
     story: {
-      title: 'Our Foundation Story',
-      body: 'Divine Gospel Delight Foundation was founded on the conviction that every act of compassion should be delivered with excellence.\n\nFrom early community relief work to structured national programmes, we have grown into a foundation committed to health, education, and spiritual uplift across Nigeria.',
+      title: 'Our Story',
+      body: OUR_STORY,
     },
     mandateQuote: {
       quote:
-        'Our faith inspires every act of compassion and every life we transform.',
+        'Restoring hope and dignity — helping people transition from just existing to fulfilling life purpose.',
     },
     leadership: {
       heading: 'Our Leadership',
-      subtext:
-        'A dedicated board guiding the foundation with faith, discipline, and operational excellence.',
+      subtext: 'Guided by faith and compassion to serve the less privileged.',
     },
   },
   founder: {
     profile: {
-      label: 'The Founder',
-      name: 'Dr. Adebayo Ogunlesi',
-      role: 'Founder & CEO',
+      label: 'Our Leaders',
+      name: "Rev'd Mrs Folake Ojo",
+      role: 'President / Chairperson',
       photoUrl:
-        'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=1200&h=1500&fit=crop',
+        'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=1200&h=1500&fit=crop',
       intro:
-        'A visionary philanthropist whose faith, discipline, and devotion to community excellence shaped the foundation’s mission to restore hope and dignity across Nigeria.',
+        'Meet the servants guiding Divine Gospel Delight Foundation — leading with faith, compassion, and a heart for the less privileged.',
     },
     article: {
-      label: 'His Story',
-      headline: 'A life devoted to service and excellence',
-      body: 'Dr. Adebayo Ogunlesi founded Divine Gospel Delight Foundation with a clear conviction: humanitarian work should be marked by excellence, dignity, and lasting impact—not spectacle.\n\nRaised with a deep sense of faith and responsibility, he saw early how poverty and limited opportunity could steal delight from entire communities. That awareness became a calling.\n\nUnder his leadership, DGDF has pursued a standard of delivery rarely associated with charity—precise planning, accountable stewardship, and programs designed to help people move from surviving to thriving.',
+      label: 'Our Story',
+      headline: 'Propagating the Gospel through service for humanity',
+      body: OUR_STORY.split(/(?<=\.)\s+/).join('\n\n'),
     },
     quote: {
-      quote:
-        'Our mission transcends mere charity; it is a divine commitment to uplift the vulnerable and showcase the true spirit of African resilience through tangible impact.',
-      attribution: 'Dr. Adebayo Ogunlesi',
+      quote: VISION,
+      attribution: 'Divine Gospel Delight Foundation',
     },
     cta: {
-      headline: 'Continue the Work He Began',
-      body: 'Support the programs and communities shaped by this vision—your partnership helps restore hope with excellence and dignity.',
+      headline: 'Walk With Us in This Mandate',
+      body: 'Your partnership helps us restore hope, empower families, and point people toward purpose across Nigeria.',
       primaryLabel: 'Support Our Work',
       secondaryLabel: 'Back to About',
     },
   },
   gallery: {
     hero: {
-      label: 'Our Visual Narrative',
-      headline: 'Capturing the Heart of Every Outreach',
-      body: 'A documentary-style journey through the communities we serve. These are the faces of hope, the hands of change, and the spirit of a community united in faith and service.',
+      label: 'Our Gallery',
+      headline: 'Capturing Every Act of Service',
+      body: 'Moments from our outreach among widows, orphans, families, and neighbors — where compassion meets dignity and the Gospel is lived out in service.',
     },
     testimonial: {
       quote:
-        "The Divine Gospel Delight Foundation didn't just give us resources; they gave us hope. Our community has seen a transformation that only grace could bring.",
-      name: 'Sister Ngozi Adeyemi',
-      role: 'Community Leader, Lagos Outreach',
+        'Divine Gospel Delight Foundation didn’t just offer help — they offered hope. Our neighborhood felt seen, valued, and strengthened by their service.',
+      name: 'Community Neighbor',
+      role: 'Outreach Beneficiary',
       photoUrl:
         'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&h=400&fit=crop',
     },
     cta: {
       headline: 'Be Part of the Next Chapter',
-      body: 'Your support allows us to continue documenting and creating these stories of transformation. Every donation directly funds our next outreach.',
+      body: 'Your support helps us continue serving communities and capturing stories of hope across Nigeria.',
       primaryLabel: 'Donate Now',
-      secondaryLabel: 'Join as Volunteer',
+      secondaryLabel: 'Contact Us',
     },
   },
   donate: {
     hero: {
-      headline: 'Your Generosity, Their Future.',
+      headline: 'Restore Hope. Uplift Dignity.',
       subtext:
-        'Every donation is a seed planted for sustainable change. Join our mission to provide dignity, education, and health to communities across Nigeria.',
+        'Your gift helps us meet the needs of widows, orphans, retirees, and families — providing humanitarian and empowerment support that restores hope across Nigeria.',
     },
     impactStats: {
-      peopleReached: 12402,
+      peopleReached: 12000,
       outreaches: 45,
     },
     testimonial: {
       quote:
-        'Supporting this foundation has been one of the most meaningful decisions I have made. You can see the dignity restored in every community they touch.',
-      donorName: 'Chioma Adebayo',
-      donorRole: 'Monthly Partner',
+        'Giving through this foundation feels like planting hope. You can see compassion and dignity in the way they serve.',
+      donorName: 'A Faithful Partner',
+      donorRole: 'Monthly Supporter',
     },
   },
   contact: {
     hero: {
-      headline: 'Connecting hearts to the mission of compassion.',
+      headline: 'We Would Love to Hear from You',
       subtext:
-        'Whether you have a question about our programmes, wish to partner with us, or simply want to share a word of encouragement — we are here to listen.',
+        'Whether you want to partner with us, volunteer, ask about our programmes, or share a word of encouragement — our team is ready to listen with grace.',
     },
     info: {
-      phone: '+234 1 234 5678',
-      email: 'info@dgdelightfound.org',
-      address:
-        '12 Prosperity Lane, Victoria Island Extension,\nLagos, Nigeria',
+      phone: '08037310730\n08033705759',
+      email: 'divinegospeldelight.ministry@gmail.com',
+      address: 'Lagos, Nigeria',
       officeHours: 'Monday – Friday: 9:00 AM – 5:00 PM',
     },
     social: {
@@ -140,14 +146,14 @@ export const DEFAULT_CMS_DOCUMENT = {
 export const DEFAULT_SITE_SETTINGS = {
   organization: {
     name: 'Divine Gospel Delight Foundation',
-    tagline: 'Humanitarian Impact in Nigeria',
+    tagline: 'Restoring Hope and Dignity to Every Life',
     logoUrl: '',
     logoPublicId: '',
   },
   contact: {
-    phone: '+234 (0) 800 DELIGHT',
-    email: 'info@dgdelightfound.org',
-    address: '12 Corporate Way, Victoria Island, Lagos, Nigeria',
+    phone: '08037310730\n08033705759',
+    email: 'divinegospeldelight.ministry@gmail.com',
+    address: 'Lagos, Nigeria',
     officeHours: 'Monday – Friday: 9:00 AM – 5:00 PM',
   },
   social: {
@@ -158,3 +164,29 @@ export const DEFAULT_SITE_SETTINGS = {
   },
   lastUpdatedAt: new Date().toISOString(),
 };
+
+/** Default published leadership shown on About and Meet Our Leaders */
+export const DEFAULT_LEADERSHIP = [
+  {
+    name: "Rev'd Mrs Folake Ojo",
+    role: 'President / Chairperson',
+    bio: 'Rev\'d Mrs Folake Ojo serves as President and Chairperson of Divine Gospel Delight Foundation. With a heart for gospel-centered service, she guides the foundation’s work of restoring hope and dignity to the less privileged across Nigeria.',
+    photoUrl:
+      'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&h=1000&fit=crop',
+    publicId: '',
+    sortOrder: 1,
+    status: 'published',
+    isFounder: true,
+  },
+  {
+    name: 'Bolanle Ojo',
+    role: 'Secretary',
+    bio: 'Bolanle Ojo serves as Secretary of Divine Gospel Delight Foundation. She helps coordinate the foundation’s outreach and administrative work so widows, orphans, families, and communities can be served with care and excellence.',
+    photoUrl:
+      'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=800&h=1000&fit=crop',
+    publicId: '',
+    sortOrder: 2,
+    status: 'published',
+    isFounder: false,
+  },
+];

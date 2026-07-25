@@ -1,37 +1,14 @@
 import { isDBConnected } from '../config/db.js';
+import { DEFAULT_LEADERSHIP } from '../data/defaults.js';
 import Leadership from '../models/Leadership.js';
 
 /** @type {Array<object>} */
-let mockLeadership = [
-  {
-    _id: 'mock-lead-1',
-    name: 'Dr. Adebayo Ogunlesi',
-    role: 'Founder & CEO',
-    bio: 'A visionary philanthropist with over 20 years of experience in strategic development and international relations.',
-    photoUrl:
-      'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&h=1000&fit=crop',
-    publicId: '',
-    sortOrder: 1,
-    status: 'published',
-    isFounder: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    _id: 'mock-lead-2',
-    name: 'Chioma Nnaji',
-    role: 'Operations Director',
-    bio: 'Leading our ground-level execution with a focus on operational excellence and sustainable community impact.',
-    photoUrl:
-      'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&h=1000&fit=crop',
-    publicId: '',
-    sortOrder: 2,
-    status: 'published',
-    isFounder: false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
+let mockLeadership = DEFAULT_LEADERSHIP.map((member, index) => ({
+  ...member,
+  _id: `mock-lead-${index + 1}`,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+}));
 
 /**
  * @param {boolean} publishedOnly
