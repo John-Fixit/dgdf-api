@@ -181,9 +181,9 @@ export const DEFAULT_LEADERSHIP = [
   {
     name: 'Bolanle Ojo',
     role: 'Secretary',
-    bio: 'Bolanle Ojo serves as Secretary of Divine Gospel Delight Foundation. She helps coordinate the foundation’s outreach and administrative work so widows, orphans, families, and communities can be served with care and excellence.',
+    bio: 'Bolanle Ojo serves as Secretary of Divine Gospel Delight Foundation. He helps coordinate the foundation’s outreach and administrative work so widows, orphans, families, and communities can be served with care and excellence.',
     photoUrl:
-      'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=800&h=1000&fit=crop',
+      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=800&h=1000&fit=crop',
     publicId: '',
     sortOrder: 2,
     status: 'published',

@@ -1,6 +1,7 @@
 import { AppError } from '../utils/AppError.js';
 import { CONTENT_PAGES } from '../models/SiteContent.js';
 import * as contentDao from '../daos/content.dao.js';
+import { notifyPublicRevalidate } from '../utils/notifyPublicRevalidate.js';
 
 /**
  * Get the full CMS document.
@@ -21,7 +22,9 @@ export async function replaceContent(payload) {
       throw new AppError(`Missing content page: ${page}`, 400);
     }
   }
-  return contentDao.replaceDocument(payload);
+  const doc = await contentDao.replaceDocument(payload);
+  await notifyPublicRevalidate('content-replace');
+  return doc;
 }
 
 /**
@@ -41,5 +44,7 @@ export async function updateContentSection(page, section, data) {
   if (!data || typeof data !== 'object') {
     throw new AppError('Section data is required', 400);
   }
-  return contentDao.updateSection(page, section, data);
+  const doc = await contentDao.updateSection(page, section, data);
+  await notifyPublicRevalidate(`content-${page}-${section}`);
+  return doc;
 }
