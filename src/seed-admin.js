@@ -1,13 +1,13 @@
-import 'dotenv/config';
-import mongoose from 'mongoose';
-import User from './models/User.js';
+import "dotenv/config";
+import mongoose from "mongoose";
+import User from "./models/User.js";
 
 const SUPER_ADMIN = {
-  name: 'Super Admin',
-  email: 'admin@dgdelightfound.org',
-  password: 'Admin@2026',
-  role: 'super_admin',
-  status: 'active',
+  name: "Super Admin",
+  email: "admin@dgdelightfound.org",
+  password: "Admin@2026",
+  role: "super_admin",
+  status: "active",
 };
 
 /**
@@ -16,12 +16,12 @@ const SUPER_ADMIN = {
  */
 async function seed() {
   if (!process.env.MONGODB_URI) {
-    console.error('MONGODB_URI is required');
+    console.error("MONGODB_URI is required");
     process.exit(1);
   }
 
   await mongoose.connect(process.env.MONGODB_URI, {
-    dbName: 'dgdelightfound_db',
+    dbName: "dgdelightfound_db",
   });
 
   const email = SUPER_ADMIN.email.toLowerCase();
@@ -29,12 +29,12 @@ async function seed() {
 
   if (existing) {
     let updated = false;
-    if (existing.role !== 'super_admin') {
-      existing.role = 'super_admin';
+    if (existing.role !== "super_admin") {
+      existing.role = "super_admin";
       updated = true;
     }
-    if (existing.status !== 'active') {
-      existing.status = 'active';
+    if (existing.status !== "active") {
+      existing.status = "active";
       updated = true;
     }
     if (!existing.name?.trim()) {
@@ -53,13 +53,13 @@ async function seed() {
 
   const user = await User.create(SUPER_ADMIN);
   console.log(
-    `Super admin created: ${email} (id: ${user._id}) role=${user.role}`
+    `Super admin created: ${email} (id: ${user._id}) role=${user.role}`,
   );
   await mongoose.disconnect();
 }
 
 seed().catch(async (err) => {
-  console.error('Seed failed:', err.message);
+  console.error("Seed failed:", err.message);
   await mongoose.disconnect().catch(() => {});
   process.exit(1);
 });
