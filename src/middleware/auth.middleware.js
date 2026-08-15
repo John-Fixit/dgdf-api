@@ -11,6 +11,20 @@ export const PORTAL_ROLES = ["super_admin", "admin", "viewer"];
 /** Roles that can mutate content / gallery / messages */
 export const EDITOR_ROLES = ["super_admin", "admin"];
 
+const DEFAULT_IDLE_TIMEOUT_MINUTES = 20;
+
+/**
+ * Minutes of inactivity before a session is considered expired.
+ * Token exp and cookie maxAge both slide to this value on each
+ * successful /auth/heartbeat call, so the session only lasts as
+ * long as the portal keeps seeing real activity.
+ * @returns {number}
+ */
+export function getIdleTimeoutMinutes() {
+  const raw = Number(process.env.IDLE_TIMEOUT_MINUTES);
+  return Number.isFinite(raw) && raw > 0 ? raw : DEFAULT_IDLE_TIMEOUT_MINUTES;
+}
+
 /**
  * Get the JWT secret, falling back to a development placeholder.
  * @returns {string}
@@ -20,13 +34,14 @@ function getJwtSecret() {
 }
 
 /**
- * Sign a JWT for the given user payload.
+ * Sign a JWT for the given user payload. Expiry equals the idle timeout —
+ * call this again (via /auth/heartbeat) on activity to slide the session forward.
  * @param {{ id: string, email: string, role: string }} payload
  * @returns {string}
  */
 export function signToken(payload) {
   return jwt.sign(payload, getJwtSecret(), {
-    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+    expiresIn: `${getIdleTimeoutMinutes()}m`,
   });
 }
 
@@ -39,7 +54,7 @@ export function authCookieOptions() {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
+    maxAge: getIdleTimeoutMinutes() * 60 * 1000,
   };
 }
 

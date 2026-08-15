@@ -6,6 +6,7 @@ import {
   clearAuthCookieOptions,
   COOKIE_NAME,
   getClientIp,
+  signToken,
 } from '../middleware/auth.middleware.js';
 
 /**
@@ -58,6 +59,23 @@ export async function logout(req, res) {
  */
 export async function me(req, res) {
   return success(res, authService.getCurrentUser(req.user), 'Current user');
+}
+
+/**
+ * POST /auth/heartbeat
+ * Re-issues the session token, sliding its expiry forward by the idle
+ * timeout. Called by the frontend only while the admin is actively using
+ * the portal — an expired/missing token here already 401s via `protect`.
+ */
+export async function heartbeat(req, res) {
+  const token = signToken({
+    id: req.user.id,
+    email: req.user.email,
+    role: req.user.role,
+  });
+
+  res.cookie(COOKIE_NAME, token, authCookieOptions());
+  return success(res, req.user, 'Session extended');
 }
 
 /**
