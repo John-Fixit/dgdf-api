@@ -1,7 +1,6 @@
 import { AppError } from '../utils/AppError.js';
 import { SETTINGS_SECTIONS } from '../models/SiteSettings.js';
 import * as settingsDao from '../daos/settings.dao.js';
-import { notifyPublicRevalidate } from '../utils/notifyPublicRevalidate.js';
 
 /**
  * Get site settings.
@@ -25,6 +24,5 @@ export async function updateSettingsSection(section, data) {
     throw new AppError('Section data is required', 400);
   }
   const settings = await settingsDao.updateSection(section, data);
-  await notifyPublicRevalidate(`settings-${section}`);
   return settings;
 }

@@ -1,10 +1,9 @@
 import { AppError } from '../utils/AppError.js';
 import { uploadImage, deleteImage } from '../config/cloudinary.js';
 import * as leadershipDao from '../daos/leadership.dao.js';
-import { notifyPublicRevalidate } from '../utils/notifyPublicRevalidate.js';
 
 /**
- * Map leadership mongoose/mock doc to API shape.
+ * Map a leadership mongoose doc to API shape.
  * @param {object} doc
  * @returns {object}
  */
@@ -73,7 +72,6 @@ export async function createLeadership(file, body) {
     isFounder: body.isFounder === true || body.isFounder === 'true',
   });
 
-  await notifyPublicRevalidate('leadership-create');
   return mapLeadership(created);
 }
 
@@ -123,7 +121,6 @@ export async function updateLeadership(id, file, body) {
   }
 
   const updated = await leadershipDao.updateById(id, updates);
-  await notifyPublicRevalidate('leadership-update');
   return mapLeadership(updated);
 }
 
@@ -141,6 +138,5 @@ export async function deleteLeadership(id) {
     await deleteImage(existing.publicId);
   }
   await leadershipDao.deleteById(id);
-  await notifyPublicRevalidate('leadership-delete');
   return mapped;
 }

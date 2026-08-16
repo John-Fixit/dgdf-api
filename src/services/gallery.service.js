@@ -1,7 +1,6 @@
 import { AppError } from '../utils/AppError.js';
 import { uploadImage, deleteImage } from '../config/cloudinary.js';
 import * as galleryDao from '../daos/gallery.dao.js';
-import { notifyPublicRevalidate } from '../utils/notifyPublicRevalidate.js';
 
 /**
  * Map gallery doc to admin/public API shape.
@@ -89,7 +88,6 @@ export async function createGalleryItem(file, meta = {}) {
     uploadedAt: new Date(),
   });
 
-  await notifyPublicRevalidate('gallery-create');
   return mapGalleryItem(created);
 }
 
@@ -139,7 +137,6 @@ export async function updateGalleryItem(id, file, meta = {}) {
   }
 
   const updated = await galleryDao.updateById(id, updates);
-  await notifyPublicRevalidate('gallery-update');
   return mapGalleryItem(updated);
 }
 
@@ -156,6 +153,5 @@ export async function deleteGalleryItem(id) {
   const mapped = mapGalleryItem(item);
   await deleteImage(item.publicId);
   await galleryDao.deleteById(id);
-  await notifyPublicRevalidate('gallery-delete');
   return mapped;
 }
