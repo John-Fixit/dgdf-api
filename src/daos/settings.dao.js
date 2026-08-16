@@ -1,8 +1,6 @@
-import { isDBConnected } from '../config/db.js';
+import { requireDb } from '../config/db.js';
 import SiteSettings, { SETTINGS_SECTIONS } from '../models/SiteSettings.js';
 import { DEFAULT_SITE_SETTINGS } from '../data/defaults.js';
-
-let mockSettings = structuredClone(DEFAULT_SITE_SETTINGS);
 
 /**
  * @param {object} doc
@@ -22,27 +20,21 @@ function toSettings(doc) {
 }
 
 /**
- * Get site settings singleton.
+ * Get site settings singleton, seeding defaults into the DB when missing.
  * @returns {Promise<object>}
  */
 export async function getSettings() {
-  if (isDBConnected()) {
-    try {
-      let doc = await SiteSettings.findOne({ slug: 'default' });
-      if (!doc) {
-        doc = await SiteSettings.create({
-          slug: 'default',
-          ...structuredClone(DEFAULT_SITE_SETTINGS),
-          lastUpdatedAt: new Date(),
-        });
-      }
-      return toSettings(doc);
-    } catch (err) {
-      console.warn('[settingsDao/getSettings] DB error:', err.message);
-    }
-  }
+  requireDb();
 
-  return structuredClone(mockSettings);
+  let doc = await SiteSettings.findOne({ slug: 'default' });
+  if (!doc) {
+    doc = await SiteSettings.create({
+      slug: 'default',
+      ...structuredClone(DEFAULT_SITE_SETTINGS),
+      lastUpdatedAt: new Date(),
+    });
+  }
+  return toSettings(doc);
 }
 
 /**
@@ -58,38 +50,23 @@ export async function updateSection(section, data) {
     throw err;
   }
 
-  if (isDBConnected()) {
-    try {
-      let doc = await SiteSettings.findOne({ slug: 'default' });
-      if (!doc) {
-        doc = await SiteSettings.create({
-          slug: 'default',
-          ...structuredClone(DEFAULT_SITE_SETTINGS),
-          lastUpdatedAt: new Date(),
-        });
-      }
+  requireDb();
 
-      doc[section] = {
-        ...doc[section]?.toObject?.() ?? doc[section],
-        ...data,
-      };
-      doc.lastUpdatedAt = new Date();
-      doc.markModified(section);
-      await doc.save();
-      return toSettings(doc);
-    } catch (err) {
-      if (err.statusCode) throw err;
-      console.warn('[settingsDao/updateSection] DB error:', err.message);
-    }
+  let doc = await SiteSettings.findOne({ slug: 'default' });
+  if (!doc) {
+    doc = await SiteSettings.create({
+      slug: 'default',
+      ...structuredClone(DEFAULT_SITE_SETTINGS),
+      lastUpdatedAt: new Date(),
+    });
   }
 
-  mockSettings = {
-    ...structuredClone(mockSettings),
-    [section]: {
-      ...mockSettings[section],
-      ...data,
-    },
-    lastUpdatedAt: new Date().toISOString(),
+  doc[section] = {
+    ...doc[section]?.toObject?.() ?? doc[section],
+    ...data,
   };
-  return structuredClone(mockSettings);
+  doc.lastUpdatedAt = new Date();
+  doc.markModified(section);
+  await doc.save();
+  return toSettings(doc);
 }

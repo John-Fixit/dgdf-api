@@ -1,12 +1,9 @@
-import { isDBConnected } from '../config/db.js';
+import { requireDb } from '../config/db.js';
 import SiteContent, { CONTENT_PAGES } from '../models/SiteContent.js';
 import { DEFAULT_CMS_DOCUMENT } from '../data/defaults.js';
 
-/** In-memory CMS document when MongoDB is unavailable */
-let mockDocument = structuredClone(DEFAULT_CMS_DOCUMENT);
-
 /**
- * Serialize a CMS mongoose doc (or mock) for API responses.
+ * Serialize a CMS mongoose doc for API responses.
  * @param {object} doc
  * @returns {object}
  */
@@ -27,27 +24,21 @@ export function toContentDocument(doc) {
 }
 
 /**
- * Get the singleton CMS document, seeding defaults when missing.
+ * Get the singleton CMS document, seeding defaults into the DB when missing.
  * @returns {Promise<object>}
  */
 export async function getDocument() {
-  if (isDBConnected()) {
-    try {
-      let doc = await SiteContent.findOne({ slug: 'default' });
-      if (!doc) {
-        doc = await SiteContent.create({
-          slug: 'default',
-          ...structuredClone(DEFAULT_CMS_DOCUMENT),
-          lastUpdatedAt: new Date(),
-        });
-      }
-      return toContentDocument(doc);
-    } catch (err) {
-      console.warn('[contentDao/getDocument] DB error:', err.message);
-    }
-  }
+  requireDb();
 
-  return structuredClone(mockDocument);
+  let doc = await SiteContent.findOne({ slug: 'default' });
+  if (!doc) {
+    doc = await SiteContent.create({
+      slug: 'default',
+      ...structuredClone(DEFAULT_CMS_DOCUMENT),
+      lastUpdatedAt: new Date(),
+    });
+  }
+  return toContentDocument(doc);
 }
 
 /**
@@ -56,34 +47,19 @@ export async function getDocument() {
  * @returns {Promise<object>}
  */
 export async function replaceDocument(payload) {
+  requireDb();
+
   const next = {
     ...structuredClone(payload),
     lastUpdatedAt: new Date(),
   };
 
-  if (isDBConnected()) {
-    try {
-      const doc = await SiteContent.findOneAndUpdate(
-        { slug: 'default' },
-        { slug: 'default', ...next },
-        { upsert: true, new: true, setDefaultsOnInsert: true }
-      );
-      return toContentDocument(doc);
-    } catch (err) {
-      console.warn('[contentDao/replaceDocument] DB error:', err.message);
-    }
-  }
-
-  mockDocument = {
-    home: next.home,
-    about: next.about,
-    founder: next.founder,
-    gallery: next.gallery,
-    donate: next.donate,
-    contact: next.contact,
-    lastUpdatedAt: next.lastUpdatedAt.toISOString(),
-  };
-  return structuredClone(mockDocument);
+  const doc = await SiteContent.findOneAndUpdate(
+    { slug: 'default' },
+    { slug: 'default', ...next },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
+  return toContentDocument(doc);
 }
 
 /**
@@ -100,50 +76,29 @@ export async function updateSection(page, section, data) {
     throw err;
   }
 
-  if (isDBConnected()) {
-    try {
-      let doc = await SiteContent.findOne({ slug: 'default' });
-      if (!doc) {
-        doc = await SiteContent.create({
-          slug: 'default',
-          ...structuredClone(DEFAULT_CMS_DOCUMENT),
-          lastUpdatedAt: new Date(),
-        });
-      }
+  requireDb();
 
-      if (!doc[page] || typeof doc[page] !== 'object') {
-        const err = new Error(`Unknown page: ${page}`);
-        err.statusCode = 400;
-        throw err;
-      }
-
-      doc[page] = {
-        ...doc[page],
-        [section]: { ...data },
-      };
-      doc.lastUpdatedAt = new Date();
-      doc.markModified(page);
-      await doc.save();
-      return toContentDocument(doc);
-    } catch (err) {
-      if (err.statusCode) throw err;
-      console.warn('[contentDao/updateSection] DB error:', err.message);
-    }
+  let doc = await SiteContent.findOne({ slug: 'default' });
+  if (!doc) {
+    doc = await SiteContent.create({
+      slug: 'default',
+      ...structuredClone(DEFAULT_CMS_DOCUMENT),
+      lastUpdatedAt: new Date(),
+    });
   }
 
-  if (!mockDocument[page]) {
+  if (!doc[page] || typeof doc[page] !== 'object') {
     const err = new Error(`Unknown page: ${page}`);
     err.statusCode = 400;
     throw err;
   }
 
-  mockDocument = {
-    ...structuredClone(mockDocument),
-    [page]: {
-      ...mockDocument[page],
-      [section]: { ...data },
-    },
-    lastUpdatedAt: new Date().toISOString(),
+  doc[page] = {
+    ...doc[page],
+    [section]: { ...data },
   };
-  return structuredClone(mockDocument);
+  doc.lastUpdatedAt = new Date();
+  doc.markModified(page);
+  await doc.save();
+  return toContentDocument(doc);
 }

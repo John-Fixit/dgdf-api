@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken";
 import { error } from "../utils/ApiResponse.js";
-import { isDBConnected } from "../config/db.js";
 import * as userDao from "../daos/user.dao.js";
 
 const COOKIE_NAME = "dgdf_token";
@@ -11,6 +10,20 @@ export const PORTAL_ROLES = ["super_admin", "admin", "viewer"];
 /** Roles that can mutate content / gallery / messages */
 export const EDITOR_ROLES = ["super_admin", "admin"];
 
+const DEFAULT_IDLE_TIMEOUT_MINUTES = 20;
+
+/**
+ * Minutes of inactivity before a session is considered expired.
+ * Token exp and cookie maxAge both slide to this value on each
+ * successful /auth/heartbeat call, so the session only lasts as
+ * long as the portal keeps seeing real activity.
+ * @returns {number}
+ */
+export function getIdleTimeoutMinutes() {
+  const raw = Number(process.env.IDLE_TIMEOUT_MINUTES);
+  return Number.isFinite(raw) && raw > 0 ? raw : DEFAULT_IDLE_TIMEOUT_MINUTES;
+}
+
 /**
  * Get the JWT secret, falling back to a development placeholder.
  * @returns {string}
@@ -20,13 +33,14 @@ function getJwtSecret() {
 }
 
 /**
- * Sign a JWT for the given user payload.
+ * Sign a JWT for the given user payload. Expiry equals the idle timeout —
+ * call this again (via /auth/heartbeat) on activity to slide the session forward.
  * @param {{ id: string, email: string, role: string }} payload
  * @returns {string}
  */
 export function signToken(payload) {
   return jwt.sign(payload, getJwtSecret(), {
-    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+    expiresIn: `${getIdleTimeoutMinutes()}m`,
   });
 }
 
@@ -39,7 +53,7 @@ export function authCookieOptions() {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
+    maxAge: getIdleTimeoutMinutes() * 60 * 1000,
   };
 }
 
@@ -78,41 +92,35 @@ function toReqUser(user) {
  * @param {import('express').NextFunction} next
  */
 export async function protect(req, res, next) {
+  const token =
+    req.cookies?.[COOKIE_NAME] ||
+    (req.headers.authorization?.startsWith("Bearer ")
+      ? req.headers.authorization.slice(7)
+      : null);
+
+  if (!token) {
+    return error(res, "Not authorized — no token", 401);
+  }
+
+  let decoded;
   try {
-    const token =
-      req.cookies?.[COOKIE_NAME] ||
-      (req.headers.authorization?.startsWith("Bearer ")
-        ? req.headers.authorization.slice(7)
-        : null);
+    decoded = jwt.verify(token, getJwtSecret());
+  } catch {
+    return error(res, "Not authorized — invalid token", 401);
+  }
 
-    if (!token) {
-      return error(res, "Not authorized — no token", 401);
+  try {
+    const user = await userDao.findById(decoded.id);
+    if (!user) {
+      return error(res, "Not authorized — user not found", 401);
     }
-
-    const decoded = jwt.verify(token, getJwtSecret());
-
-    if (isDBConnected()) {
-      const user = await userDao.findById(decoded.id);
-      if (!user) {
-        return error(res, "Not authorized — user not found", 401);
-      }
-      if (user.status === "inactive") {
-        return error(res, "Account is deactivated", 403);
-      }
-      req.user = toReqUser(user);
-    } else {
-      req.user = {
-        id: decoded.id,
-        email: decoded.email,
-        name: decoded.name || "",
-        role: decoded.role || "admin",
-        status: "active",
-      };
+    if (user.status === "inactive") {
+      return error(res, "Account is deactivated", 403);
     }
-
+    req.user = toReqUser(user);
     next();
   } catch (err) {
-    return error(res, "Not authorized — invalid token", 401);
+    return error(res, err.message || "Not authorized", err.statusCode || 500);
   }
 }
 
@@ -193,23 +201,12 @@ export async function optionalProtect(req, res, next) {
     }
 
     const decoded = jwt.verify(token, getJwtSecret());
-
-    if (isDBConnected()) {
-      const user = await userDao.findById(decoded.id);
-      if (user && user.status !== "inactive") {
-        req.user = toReqUser(user);
-      }
-    } else {
-      req.user = {
-        id: decoded.id,
-        email: decoded.email,
-        name: decoded.name || "",
-        role: decoded.role || "admin",
-        status: "active",
-      };
+    const user = await userDao.findById(decoded.id);
+    if (user && user.status !== "inactive") {
+      req.user = toReqUser(user);
     }
   } catch {
-    // ignore invalid tokens for optional auth
+    // Invalid token or DB unavailable — proceed anonymously, this auth is optional
   }
   next();
 }

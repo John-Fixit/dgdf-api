@@ -15,6 +15,7 @@ import {
   login,
   logout,
   me,
+  heartbeat,
   changePassword,
   updateProfile,
 } from '../controllers/auth.controller.js';
@@ -24,6 +25,7 @@ const router = Router();
 router.post('/login', validate({ body: loginBodySchema }), asyncHandler(login));
 router.post('/logout', optionalProtect, asyncHandler(logout));
 router.get('/me', protect, asyncHandler(me));
+router.post('/heartbeat', protect, asyncHandler(heartbeat));
 
 router.patch(
   '/change-password',
