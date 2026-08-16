@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-/** Non-empty string path/query id (supports both ObjectId and mock ids). */
+/** Non-empty string path/query id (Mongo ObjectId). */
 export const idParamSchema = z.object({
   id: z
     .string({ error: 'id is required' })

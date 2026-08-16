@@ -315,51 +315,55 @@ function markPeak(points) {
  * @param {number} donationsTotal
  */
 function buildDonationStatusBreakdown(successful, pending, failed, donationsTotal) {
+  const totalCount = successful.length + pending.length + failed.length;
+  if (totalCount === 0) {
+    return [];
+  }
+
   const pendingTotal = pending.reduce((s, d) => s + (Number(d.amount) || 0), 0);
   const failedTotal = failed.reduce((s, d) => s + (Number(d.amount) || 0), 0);
   const allAmount = donationsTotal + pendingTotal + failedTotal;
+
   const rows = [
     {
       id: 'success',
       label: 'Successful',
       amount: donationsTotal,
       count: successful.length,
-      tone: 'accent',
+      tone: 'success',
     },
     {
       id: 'pending',
       label: 'Pending',
       amount: pendingTotal,
       count: pending.length,
-      tone: 'warm',
+      tone: 'warning',
     },
     {
       id: 'failed',
       label: 'Failed',
       amount: failedTotal,
       count: failed.length,
-      tone: 'slate',
+      tone: 'error',
     },
   ];
 
-  if (allAmount <= 0 && successful.length + pending.length + failed.length === 0) {
-    return [];
-  }
+  return rows.map((row) => ({
+    id: row.id,
+    label: row.label,
+    percentByAmount: allAmount > 0 ? round1dp((row.amount / allAmount) * 100) : 0,
+    percentByCount: round1dp((row.count / totalCount) * 100),
+    amountLabel: `${formatMoney(row.amount)} · ${row.count}`,
+    tone: row.tone,
+  }));
+}
 
-  const totalCount = successful.length + pending.length + failed.length || 1;
-  return rows.map((row) => {
-    const percent =
-      allAmount > 0
-        ? Math.round((row.amount / allAmount) * 100)
-        : Math.round((row.count / totalCount) * 100);
-    return {
-      id: row.id,
-      label: row.label,
-      percent,
-      amountLabel: `${formatMoney(row.amount)} · ${row.count}`,
-      tone: row.tone,
-    };
-  });
+/**
+ * @param {number} value
+ * @returns {number} value rounded to 1 decimal place
+ */
+function round1dp(value) {
+  return Math.round(value * 10) / 10;
 }
 
 /**

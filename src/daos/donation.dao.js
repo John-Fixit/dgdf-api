@@ -1,15 +1,5 @@
-import { isDBConnected } from '../config/db.js';
-import { AppError } from '../utils/AppError.js';
+import { requireDb } from '../config/db.js';
 import Donation from '../models/Donation.js';
-
-/**
- * Ensure MongoDB is available before donation operations.
- */
-function requireDb() {
-  if (!isDBConnected()) {
-    throw new AppError('Database unavailable', 503);
-  }
-}
 
 /**
  * List all donations, newest first.

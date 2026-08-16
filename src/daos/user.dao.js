@@ -1,4 +1,4 @@
-import { isDBConnected } from '../config/db.js';
+import { requireDb } from '../config/db.js';
 import User from '../models/User.js';
 
 /**
@@ -7,10 +7,7 @@ import User from '../models/User.js';
  * @returns {Promise<import('mongoose').Document | null>}
  */
 export async function findByEmailWithPassword(email) {
-  if (!isDBConnected()) {
-    return null;
-  }
-
+  requireDb();
   return User.findOne({ email: email.toLowerCase() }).select('+password');
 }
 
@@ -20,10 +17,7 @@ export async function findByEmailWithPassword(email) {
  * @returns {Promise<import('mongoose').Document | null>}
  */
 export async function findById(id) {
-  if (!isDBConnected()) {
-    return null;
-  }
-
+  requireDb();
   return User.findById(id).select('-password');
 }
 
@@ -33,10 +27,7 @@ export async function findById(id) {
  * @returns {Promise<import('mongoose').Document | null>}
  */
 export async function findByIdWithPassword(id) {
-  if (!isDBConnected()) {
-    return null;
-  }
-
+  requireDb();
   return User.findById(id).select('+password');
 }
 
@@ -45,10 +36,7 @@ export async function findByIdWithPassword(id) {
  * @returns {Promise<object[]>}
  */
 export async function findAll() {
-  if (!isDBConnected()) {
-    return [];
-  }
-
+  requireDb();
   return User.find({}).select('-password').sort({ createdAt: -1 });
 }
 
@@ -58,10 +46,7 @@ export async function findAll() {
  * @returns {Promise<object>}
  */
 export async function create(payload) {
-  if (!isDBConnected()) {
-    throw new Error('Database not connected');
-  }
-
+  requireDb();
   return User.create(payload);
 }
 
@@ -71,9 +56,6 @@ export async function create(payload) {
  * @returns {Promise<number>}
  */
 export async function count(filter = {}) {
-  if (!isDBConnected()) {
-    return 0;
-  }
-
+  requireDb();
   return User.countDocuments(filter);
 }

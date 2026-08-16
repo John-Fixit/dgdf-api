@@ -1,5 +1,4 @@
 import { AppError } from '../utils/AppError.js';
-import { isDBConnected } from '../config/db.js';
 import * as userDao from '../daos/user.dao.js';
 
 const ASSIGNABLE_ROLES = ['admin', 'viewer'];
@@ -36,10 +35,6 @@ export function mapAdministrator(doc) {
  * @returns {Promise<{ items: object[], stats: object }>}
  */
 export async function listAdministrators() {
-  if (!isDBConnected()) {
-    throw new AppError('Administrators require a database connection', 503);
-  }
-
   const users = await userDao.findAll();
   const items = users.map(mapAdministrator);
 
@@ -59,10 +54,6 @@ export async function listAdministrators() {
  * @returns {Promise<object>}
  */
 export async function createAdministrator(body, createdById) {
-  if (!isDBConnected()) {
-    throw new AppError('Administrators require a database connection', 503);
-  }
-
   const email = String(body.email || '')
     .trim()
     .toLowerCase();
@@ -107,10 +98,6 @@ export async function createAdministrator(body, createdById) {
  * @returns {Promise<{ admin: object, previousRole: string }>}
  */
 export async function updateAdministratorRole(id, body) {
-  if (!isDBConnected()) {
-    throw new AppError('Administrators require a database connection', 503);
-  }
-
   if (!ASSIGNABLE_ROLES.includes(body.role)) {
     throw new AppError('Role must be admin or viewer', 400);
   }
@@ -143,10 +130,6 @@ export async function updateAdministratorRole(id, body) {
  * @returns {Promise<object>}
  */
 export async function updateAdministratorStatus(id, body, actorId) {
-  if (!isDBConnected()) {
-    throw new AppError('Administrators require a database connection', 503);
-  }
-
   if (!['active', 'inactive'].includes(body.status)) {
     throw new AppError('Status must be active or inactive', 400);
   }
@@ -177,10 +160,6 @@ export async function updateAdministratorStatus(id, body, actorId) {
  * @returns {Promise<object>}
  */
 export async function resetAdministratorPassword(id, body) {
-  if (!isDBConnected()) {
-    throw new AppError('Administrators require a database connection', 503);
-  }
-
   const password = body.password;
   if (!password || String(password).length < 8) {
     throw new AppError('Password must be at least 8 characters', 400);

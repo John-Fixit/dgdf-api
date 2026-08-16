@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken";
 import { error } from "../utils/ApiResponse.js";
-import { isDBConnected } from "../config/db.js";
 import * as userDao from "../daos/user.dao.js";
 
 const COOKIE_NAME = "dgdf_token";
@@ -93,41 +92,35 @@ function toReqUser(user) {
  * @param {import('express').NextFunction} next
  */
 export async function protect(req, res, next) {
+  const token =
+    req.cookies?.[COOKIE_NAME] ||
+    (req.headers.authorization?.startsWith("Bearer ")
+      ? req.headers.authorization.slice(7)
+      : null);
+
+  if (!token) {
+    return error(res, "Not authorized — no token", 401);
+  }
+
+  let decoded;
   try {
-    const token =
-      req.cookies?.[COOKIE_NAME] ||
-      (req.headers.authorization?.startsWith("Bearer ")
-        ? req.headers.authorization.slice(7)
-        : null);
+    decoded = jwt.verify(token, getJwtSecret());
+  } catch {
+    return error(res, "Not authorized — invalid token", 401);
+  }
 
-    if (!token) {
-      return error(res, "Not authorized — no token", 401);
+  try {
+    const user = await userDao.findById(decoded.id);
+    if (!user) {
+      return error(res, "Not authorized — user not found", 401);
     }
-
-    const decoded = jwt.verify(token, getJwtSecret());
-
-    if (isDBConnected()) {
-      const user = await userDao.findById(decoded.id);
-      if (!user) {
-        return error(res, "Not authorized — user not found", 401);
-      }
-      if (user.status === "inactive") {
-        return error(res, "Account is deactivated", 403);
-      }
-      req.user = toReqUser(user);
-    } else {
-      req.user = {
-        id: decoded.id,
-        email: decoded.email,
-        name: decoded.name || "",
-        role: decoded.role || "admin",
-        status: "active",
-      };
+    if (user.status === "inactive") {
+      return error(res, "Account is deactivated", 403);
     }
-
+    req.user = toReqUser(user);
     next();
   } catch (err) {
-    return error(res, "Not authorized — invalid token", 401);
+    return error(res, err.message || "Not authorized", err.statusCode || 500);
   }
 }
 
@@ -208,23 +201,12 @@ export async function optionalProtect(req, res, next) {
     }
 
     const decoded = jwt.verify(token, getJwtSecret());
-
-    if (isDBConnected()) {
-      const user = await userDao.findById(decoded.id);
-      if (user && user.status !== "inactive") {
-        req.user = toReqUser(user);
-      }
-    } else {
-      req.user = {
-        id: decoded.id,
-        email: decoded.email,
-        name: decoded.name || "",
-        role: decoded.role || "admin",
-        status: "active",
-      };
+    const user = await userDao.findById(decoded.id);
+    if (user && user.status !== "inactive") {
+      req.user = toReqUser(user);
     }
   } catch {
-    // ignore invalid tokens for optional auth
+    // Invalid token or DB unavailable — proceed anonymously, this auth is optional
   }
   next();
 }
