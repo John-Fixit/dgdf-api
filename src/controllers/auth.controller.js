@@ -79,6 +79,40 @@ export async function heartbeat(req, res) {
 }
 
 /**
+ * POST /auth/forgot-password
+ */
+export async function forgotPassword(req, res) {
+  await authService.forgotPassword(req.body.email);
+  return success(
+    res,
+    null,
+    'If that email is registered, a reset link has been sent'
+  );
+}
+
+/**
+ * POST /auth/reset-password
+ */
+export async function resetPassword(req, res) {
+  const { token, newPassword } = req.body;
+  const user = await authService.resetPassword(token, newPassword);
+
+  await recordAudit({
+    actor: user,
+    action: 'update',
+    entity: 'auth',
+    entityId: user.id,
+    entityLabel: user.name,
+    category: 'auth',
+    details: `${user.name} reset their password`,
+    ipAddress: getClientIp(req),
+    changes: ['password-reset'],
+  });
+
+  return success(res, null, 'Password reset successfully');
+}
+
+/**
  * PATCH /auth/change-password
  */
 export async function changePassword(req, res) {

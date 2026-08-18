@@ -12,6 +12,29 @@ export async function findByEmailWithPassword(email) {
 }
 
 /**
+ * Find a user by email (without password).
+ * @param {string} email
+ * @returns {Promise<import('mongoose').Document | null>}
+ */
+export async function findByEmail(email) {
+  requireDb();
+  return User.findOne({ email: email.toLowerCase() });
+}
+
+/**
+ * Find a user by a hashed, non-expired password-reset token.
+ * @param {string} hashedToken
+ * @returns {Promise<import('mongoose').Document | null>}
+ */
+export async function findByResetToken(hashedToken) {
+  requireDb();
+  return User.findOne({
+    resetPasswordToken: hashedToken,
+    resetPasswordExpires: { $gt: new Date() },
+  }).select('+resetPasswordToken +resetPasswordExpires');
+}
+
+/**
  * Find a user by id (without password).
  * @param {string} id
  * @returns {Promise<import('mongoose').Document | null>}
