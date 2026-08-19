@@ -24,6 +24,22 @@ export const changePasswordBodySchema = z
     path: ['newPassword'],
   });
 
+export const forgotPasswordBodySchema = z.object({
+  email: z
+    .string({ error: 'Email is required' })
+    .trim()
+    .email('Valid email is required'),
+});
+
+export const resetPasswordBodySchema = z.object({
+  token: z
+    .string({ error: 'Reset token is required' })
+    .min(1, 'Reset token is required'),
+  newPassword: z
+    .string({ error: 'New password is required' })
+    .min(8, 'New password must be at least 8 characters'),
+});
+
 export const updateProfileBodySchema = z.object({
   name: z
     .string({ error: 'Name is required' })
