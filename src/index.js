@@ -17,6 +17,7 @@ import mediaRoutes from "./routes/media.routes.js";
 import auditRoutes from "./routes/audit.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
 import administratorRoutes from "./routes/administrator.routes.js";
+import analyticsRoutes from "./routes/analytics.route.js"
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -56,6 +57,7 @@ app.get("/health", (req, res) => {
 });
 
 app.use("/auth", authRoutes);
+app.use("/analytics", analyticsRoutes)
 app.use("/gallery", galleryRoutes);
 app.use("/donations", donationRoutes);
 app.use("/messages", messageRoutes);
