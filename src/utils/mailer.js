@@ -1,39 +1,29 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
-let transporter = null;
+let resend = null;
 
 /**
- * Lazily build (and cache) the nodemailer SMTP transporter.
- * @returns {import('nodemailer').Transporter}
+ * Lazily build (and cache) the Resend client.
+ * @returns {Resend}
  */
-function getTransporter() {
-  if (transporter) return transporter;
-
-  transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT) || 587,
-    secure: Number(process.env.SMTP_PORT) === 465,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASSWORD,
-    },
-  });
-
-  return transporter;
+function getClient() {
+  if (resend) return resend;
+  resend = new Resend(process.env.RESEND_API_KEY);
+  return resend;
 }
 
 /**
  * Send a password-reset email containing the reset link.
+ * Uses the Resend HTTP API (not SMTP) so it works on hosts that block
+ * outbound SMTP ports, e.g. Render's free tier.
  * @param {string} to - Recipient email address
  * @param {string} resetUrl - Full URL to the admin reset-password page
  * @param {number} expiresInMinutes - Link validity window, for the copy
  * @returns {Promise<void>}
  */
 export async function sendPasswordResetEmail(to, resetUrl, expiresInMinutes) {
-  const from = process.env.SMTP_FROM || process.env.SMTP_USER;
-
-  await getTransporter().sendMail({
-    from,
+  const { error } = await getClient().emails.send({
+    from: process.env.EMAIL_FROM,
     to,
     subject: 'Reset your DGDF Admin password',
     html: `
@@ -51,4 +41,8 @@ export async function sendPasswordResetEmail(to, resetUrl, expiresInMinutes) {
       </div>
     `,
   });
+
+  if (error) {
+    throw new Error(error.message || 'Failed to send email via Resend');
+  }
 }
