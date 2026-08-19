@@ -38,6 +38,7 @@ export async function sendPasswordResetEmail(to, resetUrl, expiresInMinutes) {
     subject: 'Reset your DGDF Admin password',
     html: `
       <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+      <img src="https://dgdelightfound.org/_next/image?url=%2Flogo.png&w=1080&q=75" alt="dgdf-logo" style="width: 200px;"/>
         <h2 style="color: #1a1a2e;">Reset your password</h2>
         <p>We received a request to reset the password for your DGDF Admin account.</p>
         <p>
